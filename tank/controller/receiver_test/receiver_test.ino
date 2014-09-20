@@ -11,7 +11,7 @@ int led_r = 9;
 void setup()  
 {
   Serial.begin(9600);
-  Serial.println("Hello!");
+  Serial.println("Hello Receiver Test!");
 
   BTSerial.begin(9600);  // set the data rate for the BT port
   //BTSerial.begin(115200);

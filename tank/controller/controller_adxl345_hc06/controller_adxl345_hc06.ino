@@ -23,6 +23,10 @@ char values[10];
 //These variables will be used to hold the x,y and z axis accelerometer values.
 int x,y,z;
 
+byte pre_status = 'S';
+byte current_status = 'S';
+int status_count = 0;
+
 void setup(){ 
   //Initiate an SPI communication instance.
   SPI.begin();
@@ -58,25 +62,48 @@ void loop(){
   z = ((int)values[5]<<8)|(int)values[4];
   
   //Print the results to the terminal.
+  Serial.print("current_status=");
+  Serial.print(current_status);
+  Serial.print("; ");
   Serial.print(x, DEC);
   Serial.print(',');
   Serial.print(y, DEC);
   Serial.print(',');
-  Serial.println(z, DEC);
+  Serial.print(z, DEC);
   
-  if (x < -40) {
-    Serial.print("FORWARD");
-    BTSerial.write("F");
-  } else if (x > 40) {
-    BTSerial.write("B");
-  } else if (y < -40) {
-    BTSerial.write("L");
-  } else if (y > 40) {
-    BTSerial.write("R");
+  byte status = 'S';
+  
+  if (y < -10) {
+    status = 'L'; // 76
+  } else if (y > 70) {
+    status = 'R'; // 82
+  } else if (x < -60) {
+    status = 'F'; // 70
+  } else if (x > 20) {
+    status = 'B'; // 66
   } else {
-    BTSerial.write("S");
+    status = 'S'; // 83
   }
     
+  if (pre_status != status) {
+    pre_status = status;
+    status_count = 0;
+  } else {
+    status_count++;
+    
+    if (status_count > 5) {
+      if (status != current_status || status_count % 30 == 0) {
+        Serial.print("; send status=");
+        Serial.print(status);
+        BTSerial.write(status);
+        
+        current_status = status;
+      }
+    }
+  }
+  
+  Serial.println("");
+ 
   delay(10); 
 }
 
