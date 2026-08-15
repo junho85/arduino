@@ -4,7 +4,7 @@ TZT 0.96인치 4핀 OLED 모듈(SSD1306, 128x64, I2C)을 Arduino Uno/Nano(AVR)�
 
 ## 실기 검증 (2026-08-15)
 
-![UNO + TZT 0.96" OLED 연결](images/uno-wiring.png)
+![UNO + TZT 0.96" OLED 연결](images/uno-wiring.jpg)
 
 *`04_u8g2_bigfont` 동작 중. 큰 숫자 `03:50`과 하단 `RAM: ~128B buffer` / 진행 바.
 모듈 실크는 `1 GND / 2 VDD / 3 SCK / 4 SDA`.*
