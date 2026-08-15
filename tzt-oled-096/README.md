@@ -2,6 +2,10 @@
 
 TZT 0.96인치 4핀 OLED 모듈(SSD1306, 128x64, I2C)을 Arduino Uno/Nano(AVR)에 붙이는 예제.
 
+검증에 쓴 모듈: [TZT 0.96" OLED 128x64 I2C SSD1306 (AliExpress)](https://s.click.aliexpress.com/e/_c3K5uwT9)
+
+> 위 링크는 알리익스프레스 제휴 링크입니다. 링크를 통해 구매가 이루어지면 작성자가 일정액의 수수료를 받습니다.
+
 ## 실기 검증 (2026-08-15)
 
 ![UNO + TZT 0.96" OLED 연결](images/uno-wiring.jpg)
@@ -170,13 +174,18 @@ U8g2는 주소를 8비트로 저장했다가 전송 시점에 `>>1` 한다
 그래서 스캐너가 알려준 7비트 주소에 2를 곱해 넣어야 한다.
 `0x3C`짜리 모듈은 U8g2 기본값이라 설정할 필요가 없다.
 
-### 3. `SSD1306_SWITCHCAPVCC`를 빼먹으면 화면이 안 켜진다
+### 3. `SSD1306_EXTERNALVCC`를 지정하면 화면이 안 켜진다
 
 TZT 모듈은 외부 고전압 전원이 없고 SSD1306 내부 charge pump로 패널을 구동한다.
 `begin()` 첫 인자에 따라 charge pump 명령(0x8D)의 인자가 갈린다
 (`Adafruit_SSD1306.cpp:582` — `EXTERNALVCC`면 `0x10`=disable, 아니면 `0x14`=enable).
 `SSD1306_EXTERNALVCC`로 두면 I2C 통신은 멀쩡한데 화면만 까맣게 남는다.
-대비도 같이 낮아진다(`:598-604`). 디버깅하기 짜증나는 증상이라 기억해둘 것.
+대비도 같이 낮아진다(`:598-604`).
+
+⚠️ **인자를 생략하는 것 자체는 안전하다.** 헤더의 기본값이 이미 `SSD1306_SWITCHCAPVCC`다
+(`Adafruit_SSD1306.h:150` — `bool begin(uint8_t switchvcc = SSD1306_SWITCHCAPVCC, ...)`).
+즉 "빼먹으면 안 켜진다"가 아니라 **"굳이 `EXTERNALVCC`로 바꾸면 안 켜진다"**가 맞다.
+(라이브러리 2.5.16 기준)
 
 ### 4. `display()`를 안 부르면 아무 일도 안 일어난다
 
