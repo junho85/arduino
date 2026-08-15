@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>18650 게이지 배선도</title>
+
+<style>
+  :root {
+    --ground: #f6f7f9;
+    --surface: #ffffff;
+    --surface-sunk: #eef0f4;
+    --ink: #16202e;
+    --ink-soft: #4a5768;
+    --ink-faint: #7d8899;
+    --rule: #d8dde5;
+    --rule-strong: #b8c1cd;
+
+    --wire-pos: #d92d20;
+    --wire-neg: #16202e;
+    --wire-sig: #d97706;
+    --wire-i2c: #0b7285;
+    --warn-bg: #fdf4e7;
+    --warn-edge: #e0a34a;
+    --warn-ink: #8a4b0a;
+    --safe-bg: #eef6f1;
+    --safe-edge: #7fb79a;
+    --safe-ink: #1d5b3f;
+
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0f1419;
+      --surface: #171e26;
+      --surface-sunk: #10161d;
+      --ink: #e3e8ef;
+      --ink-soft: #a3aec0;
+      --ink-faint: #77839a;
+      --rule: #29323e;
+      --rule-strong: #3b4654;
+
+      --wire-pos: #f87171;
+      --wire-neg: #c3ccd9;
+      --wire-sig: #fbbf24;
+      --wire-i2c: #4bb8cc;
+      --warn-bg: #2b2113;
+      --warn-edge: #7a5a24;
+      --warn-ink: #f0c07a;
+      --safe-bg: #12241c;
+      --safe-edge: #2f5e46;
+      --safe-ink: #8fd4b0;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0f1419;
+    --surface: #171e26;
+    --surface-sunk: #10161d;
+    --ink: #e3e8ef;
+    --ink-soft: #a3aec0;
+    --ink-faint: #77839a;
+    --rule: #29323e;
+    --rule-strong: #3b4654;
+
+    --wire-pos: #f87171;
+    --wire-neg: #c3ccd9;
+    --wire-sig: #fbbf24;
+    --wire-i2c: #4bb8cc;
+    --warn-bg: #2b2113;
+    --warn-edge: #7a5a24;
+    --warn-ink: #f0c07a;
+    --safe-bg: #12241c;
+    --safe-edge: #2f5e46;
+    --safe-ink: #8fd4b0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+  }
+
+  header { display: flex; flex-direction: column; gap: 10px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 17px;
+  }
+
+  section { display: flex; flex-direction: column; gap: 16px; }
+
+  h2 {
+    margin: 0;
+    font-size: 21px;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    text-wrap: balance;
+  }
+
+  h2 .num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+
+  p { margin: 0; max-width: 66ch; }
+  p + p { margin-top: 12px; }
+
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 24px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-x: auto;
+  }
+
+  figure svg { display: block; max-width: 100%; height: auto; min-width: 480px; margin: 0 auto; }
+
+  figcaption {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    text-align: center;
+    max-width: 60ch;
+    margin: 0 auto;
+  }
+
+  .svg-label { font-family: var(--mono); font-size: 12px; fill: var(--ink); }
+  .svg-pin { font-family: var(--mono); font-size: 11px; fill: var(--ink-soft); }
+  .svg-title { font-family: var(--sans); font-size: 13px; font-weight: 600; fill: var(--ink); }
+  .svg-note { font-family: var(--sans); font-size: 11px; fill: var(--ink-faint); }
+  .box { fill: var(--surface-sunk); stroke: var(--rule-strong); stroke-width: 1.5; }
+  .zone { fill: none; stroke: var(--rule); stroke-width: 1; stroke-dasharray: 4 4; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+
+  .table-scroll { overflow-x: auto; }
+
+  th, td {
+    text-align: left;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  th {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 500;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+
+  td code, .m {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    background: var(--surface-sunk);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .swatch {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 7px;
+    vertical-align: baseline;
+  }
+
+  .callout {
+    border: 1px solid var(--warn-edge);
+    background: var(--warn-bg);
+    color: var(--warn-ink);
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .callout.ok {
+    border-color: var(--safe-edge);
+    background: var(--safe-bg);
+    color: var(--safe-ink);
+  }
+
+  .callout h3 {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+  }
+
+  .callout p { margin: 0; font-size: 14.5px; max-width: none; }
+  .callout .m { background: rgba(128, 128, 128, 0.16); }
+
+  ol, ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 7px; max-width: 66ch; }
+
+  hr { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+
+  footer { font-size: 13.5px; color: var(--ink-faint); }
+  footer code { font-family: var(--mono); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">TP4056 · SSD1306 · Arduino UNO</div>
+    <h1>18650 게이지 배선도</h1>
+    <p class="lede">
+      USB-C로 18650을 충전하면서 잔량을 OLED에 표시하는 회로.
+      선 색은 실물 점퍼선 색에 맞췄다.
+    </p>
+  </header>
+
+  <hr>
+
+  <section>
+    <h2><span class="num">01</span> 아두이노는 충전 경로에 없다</h2>
+    <p>
+      충전은 TP4056이 전담한다. 아두이노는 <span class="m">OUT+</span> 전압을 읽어 표시만 하는
+      계기판이고, 전력이 흐르는 경로에는 끼어들지 않는다. 아래 그림에서 위쪽 굵은 선이 전력,
+      아래쪽 가는 선이 신호다.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 760 300" role="img" aria-label="충전 경로는 USB-C에서 TP4056을 거쳐 18650으로 이어지고, 아두이노는 TP4056의 OUT+ 전압을 읽어 OLED에 표시만 하는 별도 경로에 있다">
+        <defs>
+          <marker id="ar-pos" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <polygon points="0,1 9,5 0,9" fill="var(--wire-pos)"></polygon>
+          </marker>
+          <marker id="ar-sig" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <polygon points="0,1 9,5 0,9" fill="var(--wire-sig)"></polygon>
+          </marker>
+          <marker id="ar-i2c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <polygon points="0,1 9,5 0,9" fill="var(--wire-i2c)"></polygon>
+          </marker>
+        </defs>
+
+        <rect class="zone" x="14" y="16" width="580" height="106" rx="8"></rect>
+        <text class="svg-note" x="26" y="36">전력 — 충전 경로</text>
+
+        <rect class="zone" x="14" y="160" width="732" height="124" rx="8"></rect>
+        <text class="svg-note" x="26" y="180">신호 — 측정·표시 경로</text>
+
+        <rect class="box" x="34" y="52" width="104" height="52" rx="6"></rect>
+        <text class="svg-label" x="86" y="76" text-anchor="middle">USB-C</text>
+        <text class="svg-pin" x="86" y="92" text-anchor="middle">5V 1A</text>
+
+        <rect class="box" x="222" y="52" width="118" height="52" rx="6"></rect>
+        <text class="svg-label" x="281" y="76" text-anchor="middle">TP4056</text>
+        <text class="svg-pin" x="281" y="92" text-anchor="middle">CC / CV</text>
+
+        <rect class="box" x="424" y="52" width="118" height="52" rx="6"></rect>
+        <text class="svg-label" x="483" y="76" text-anchor="middle">18650</text>
+        <text class="svg-pin" x="483" y="92" text-anchor="middle">3.0 – 4.2V</text>
+
+        <line x1="138" y1="78" x2="214" y2="78" stroke="var(--wire-pos)" stroke-width="3.5" marker-end="url(#ar-pos)"></line>
+        <line x1="340" y1="78" x2="416" y2="78" stroke="var(--wire-pos)" stroke-width="3.5" marker-end="url(#ar-pos)"></line>
+
+        <rect class="box" x="222" y="206" width="118" height="52" rx="6"></rect>
+        <text class="svg-label" x="281" y="230" text-anchor="middle">분압</text>
+        <text class="svg-pin" x="281" y="246" text-anchor="middle">10k + 10k</text>
+
+        <rect class="box" x="424" y="206" width="118" height="52" rx="6"></rect>
+        <text class="svg-label" x="483" y="230" text-anchor="middle">UNO</text>
+        <text class="svg-pin" x="483" y="246" text-anchor="middle">A0 · D2</text>
+
+        <rect class="box" x="620" y="206" width="112" height="52" rx="6"></rect>
+        <text class="svg-label" x="676" y="230" text-anchor="middle">OLED</text>
+        <text class="svg-pin" x="676" y="246" text-anchor="middle">SSD1306</text>
+
+        <path d="M 281 104 L 281 198" stroke="var(--wire-sig)" stroke-width="2" fill="none" marker-end="url(#ar-sig)"></path>
+        <text class="svg-pin" x="292" y="156">OUT+</text>
+
+        <line x1="340" y1="232" x2="416" y2="232" stroke="var(--wire-sig)" stroke-width="2" marker-end="url(#ar-sig)"></line>
+        <line x1="542" y1="232" x2="612" y2="232" stroke="var(--wire-i2c)" stroke-width="2" marker-end="url(#ar-i2c)"></line>
+        <text class="svg-pin" x="577" y="223" text-anchor="middle">I2C</text>
+      </svg>
+      <figcaption>
+        전력은 USB-C에서 셀까지 TP4056만 거친다. 아두이노가 고장 나도 충전은 계속되고,
+        아두이노 코드는 배터리를 위험하게 만들 수 없다.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span> TP4056 모듈 핀 배치</h2>
+    <p>
+      USB-C가 있는 쪽이 위, 패드 4개가 오른쪽 가장자리에 세로로 늘어선다.
+      위에서부터 <span class="m">OUT+</span> · <span class="m">B+</span> ·
+      <span class="m">B−</span> · <span class="m">OUT−</span> 순서다.
+      바깥 두 개가 출력, 안쪽 두 개가 배터리라고 외우면 헷갈리지 않는다.
+    </p>
+    <p>
+      다만 <strong><span class="m">B+</span>와 <span class="m">OUT+</span>는 기판에서 직결된
+      같은 노드다.</strong> 리튬이온 보호회로는 음극 쪽만 끊기 때문이다 — 차단용 MOSFET
+      (<span class="m">8205A</span>)이 <span class="m">B−</span>와 <span class="m">OUT−</span>
+      사이에만 들어간다. 하이사이드를 끊으려면 비싼 P채널 MOSFET이 필요해서, 거의 모든
+      배터리 보호회로가 이 구조를 쓴다.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 560 340" role="img" aria-label="TP4056 모듈 평면도. 왼쪽 위에 USB-C 커넥터, 왼쪽 가장자리에 IN 플러스와 IN 마이너스 패드, 오른쪽 가장자리에 위에서부터 OUT플러스, B플러스, B마이너스, OUT마이너스 패드가 세로로 배열되어 있다">
+        <rect x="120" y="40" width="300" height="250" rx="10" fill="var(--surface-sunk)" stroke="var(--rule-strong)" stroke-width="2"></rect>
+
+        <rect x="150" y="26" width="90" height="34" rx="5" fill="var(--rule)" stroke="var(--rule-strong)" stroke-width="1.5"></rect>
+        <text class="svg-pin" x="195" y="48" text-anchor="middle">USB-C</text>
+
+        <rect x="238" y="130" width="58" height="46" rx="3" fill="var(--rule)" stroke="var(--rule-strong)" stroke-width="1"></rect>
+        <text class="svg-pin" x="267" y="158" text-anchor="middle">4056</text>
+
+        <circle cx="176" cy="242" r="7" fill="none" stroke="var(--rule-strong)" stroke-width="2"></circle>
+        <text class="svg-pin" x="176" y="270" text-anchor="middle">DW01</text>
+
+        <circle cx="150" cy="108" r="9" fill="none" stroke="var(--wire-neg)" stroke-width="2"></circle>
+        <text class="svg-pin" x="150" y="112" text-anchor="middle">−</text>
+        <text class="svg-note" x="106" y="112" text-anchor="end">IN−</text>
+
+        <circle cx="150" cy="150" r="9" fill="none" stroke="var(--wire-pos)" stroke-width="2"></circle>
+        <text class="svg-pin" x="150" y="154" text-anchor="middle">+</text>
+        <text class="svg-note" x="106" y="154" text-anchor="end">IN+</text>
+        <text class="svg-note" x="106" y="176" text-anchor="end">USB 대신 쓸 때만</text>
+
+        <circle cx="392" cy="90" r="11" fill="none" stroke="var(--wire-sig)" stroke-width="2.5"></circle>
+        <text class="svg-label" x="418" y="95">OUT+</text>
+        <text class="svg-note" x="486" y="95">→ 분압 → A0</text>
+
+        <circle cx="392" cy="150" r="11" fill="none" stroke="var(--wire-pos)" stroke-width="2.5"></circle>
+        <text class="svg-label" x="418" y="155">B+</text>
+        <text class="svg-note" x="486" y="155">→ 배터리 빨강</text>
+
+        <circle cx="392" cy="210" r="11" fill="none" stroke="var(--wire-neg)" stroke-width="2.5"></circle>
+        <text class="svg-label" x="418" y="215">B−</text>
+        <text class="svg-note" x="486" y="215">→ 배터리 검정</text>
+
+        <circle cx="392" cy="270" r="11" fill="none" stroke="var(--wire-neg)" stroke-width="2.5"></circle>
+        <text class="svg-label" x="418" y="275">OUT−</text>
+        <text class="svg-note" x="486" y="275">→ UNO GND</text>
+
+        <path d="M 392 101 L 392 139" stroke="var(--wire-pos)" stroke-width="3"></path>
+        <text class="svg-note" x="404" y="126">직결</text>
+
+        <rect x="376" y="228" width="32" height="24" rx="3" fill="var(--surface)" stroke="var(--wire-neg)" stroke-width="1.5"></rect>
+        <text class="svg-pin" x="392" y="245" text-anchor="middle">8205A</text>
+        <line x1="392" y1="221" x2="392" y2="228" stroke="var(--wire-neg)" stroke-width="2"></line>
+        <line x1="392" y1="252" x2="392" y2="259" stroke="var(--wire-neg)" stroke-width="2"></line>
+
+        <text class="svg-note" x="120" y="318">바깥 두 개 = 출력(OUT) · 안쪽 두 개 = 배터리(B)</text>
+      </svg>
+      <figcaption>
+        <span class="m">B+</span>와 <span class="m">OUT+</span>는 기판에서 이어진 같은 노드다.
+        보호용 MOSFET은 <span class="m">B−</span>와 <span class="m">OUT−</span> 사이에만 들어간다.
+      </figcaption>
+    </figure>
+
+    <div class="callout">
+      <h3>중요한 건 <span class="m">+</span>가 아니라 접지를 어디에 무느냐다</h3>
+      <p>
+        <span class="m">+</span>는 어느 쪽에서 따도 같으므로, 실질적인 차이는 기준 접지에 있다.
+        아두이노 <span class="m">GND</span>를 <span class="m">B−</span>에 물면 보호회로를
+        우회하게 된다. 과방전 차단이 걸려도 <strong>아두이노는 계속 셀을 소모</strong>하고,
+        방치하면 셀이 영구 손상된다. 반드시 <span class="m">OUT−</span>에 문다.
+      </p>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>아두이노 GND 연결</th><th>과방전 차단이 걸렸을 때</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>OUT−</code></td><td>회로가 함께 끊김 — 셀이 더 이상 방전되지 않는다</td></tr>
+          <tr><td><code>B−</code></td><td>보호회로 우회 — 아두이노가 계속 배터리를 소모한다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      멀티미터 도통 모드로 확인할 수 있다. <span class="m">B+</span>↔<span class="m">OUT+</span>는
+      바로 삐 소리가 나고, <span class="m">B−</span>↔<span class="m">OUT−</span>는 사이에 MOSFET이
+      있어 반응이 다르다. 그 차이가 보호회로가 살아 있다는 증거다.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span> 전체 배선</h2>
+    <p>
+      배터리는 <span class="m">B+</span>/<span class="m">B−</span>에, 측정은
+      <span class="m">OUT+</span>/<span class="m">OUT−</span>에 연결한다.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 840 470" role="img" aria-label="TP4056 모듈의 오른쪽 패드에서 OUT플러스는 분압 저항을 거쳐 아두이노 A0로, B플러스와 B마이너스는 아래쪽 18650 배터리로, OUT마이너스는 아두이노 GND로 이어지고, 아두이노 A4와 A5는 OLED의 SDA와 SCK에 연결된다">
+        <rect class="box" x="40" y="60" width="150" height="240" rx="8"></rect>
+        <text class="svg-title" x="115" y="92" text-anchor="middle">TP4056</text>
+        <rect x="78" y="36" width="74" height="26" rx="4" fill="var(--rule)" stroke="var(--rule-strong)" stroke-width="1.2"></rect>
+        <text class="svg-pin" x="115" y="54" text-anchor="middle">USB-C</text>
+
+        <circle cx="190" cy="120" r="5" fill="var(--wire-sig)"></circle>
+        <text class="svg-pin" x="180" y="124" text-anchor="end">OUT+</text>
+        <circle cx="190" cy="170" r="5" fill="var(--wire-pos)"></circle>
+        <text class="svg-pin" x="180" y="174" text-anchor="end">B+</text>
+        <circle cx="190" cy="220" r="5" fill="var(--wire-neg)"></circle>
+        <text class="svg-pin" x="180" y="224" text-anchor="end">B−</text>
+        <circle cx="190" cy="270" r="5" fill="var(--wire-neg)"></circle>
+        <text class="svg-pin" x="180" y="274" text-anchor="end">OUT−</text>
+
+        <circle cx="115" cy="300" r="5" fill="var(--wire-sig)"></circle>
+        <text class="svg-pin" x="126" y="316">CHRG</text>
+
+        <rect class="box" x="250" y="356" width="170" height="66" rx="8"></rect>
+        <text class="svg-title" x="335" y="384" text-anchor="middle">18650</text>
+        <text class="svg-pin" x="335" y="404" text-anchor="middle">JST 커넥터</text>
+        <circle cx="250" cy="374" r="5" fill="var(--wire-pos)"></circle>
+        <text class="svg-pin" x="240" y="366" text-anchor="end">+</text>
+        <circle cx="250" cy="404" r="5" fill="var(--wire-neg)"></circle>
+        <text class="svg-pin" x="240" y="412" text-anchor="end">−</text>
+
+        <path d="M 190 170 L 216 170 L 216 374 L 250 374" stroke="var(--wire-pos)" stroke-width="2.5" fill="none"></path>
+        <path d="M 190 220 L 232 220 L 232 404 L 250 404" stroke="var(--wire-neg)" stroke-width="2.5" fill="none"></path>
+
+        <line x1="190" y1="120" x2="262" y2="120" stroke="var(--wire-sig)" stroke-width="2.5"></line>
+        <rect class="box" x="262" y="108" width="58" height="24" rx="3"></rect>
+        <text class="svg-pin" x="291" y="102" text-anchor="middle">R1 10k</text>
+        <line x1="320" y1="120" x2="470" y2="120" stroke="var(--wire-sig)" stroke-width="2.5"></line>
+
+        <circle cx="360" cy="120" r="4.5" fill="var(--wire-sig)"></circle>
+        <text class="svg-note" x="368" y="112">중간 탭</text>
+
+        <line x1="360" y1="120" x2="360" y2="164" stroke="var(--wire-sig)" stroke-width="2.5"></line>
+        <rect class="box" x="348" y="164" width="24" height="58" rx="3"></rect>
+        <text class="svg-pin" x="380" y="198">R2 10k</text>
+        <line x1="360" y1="222" x2="360" y2="270" stroke="var(--wire-neg)" stroke-width="2.5"></line>
+        <circle cx="360" cy="270" r="4.5" fill="var(--wire-neg)"></circle>
+
+        <rect class="box" x="470" y="60" width="160" height="260" rx="8"></rect>
+        <text class="svg-title" x="550" y="92" text-anchor="middle">Arduino UNO</text>
+
+        <circle cx="470" cy="120" r="5" fill="var(--wire-sig)"></circle>
+        <text class="svg-pin" x="480" y="124">A0</text>
+        <circle cx="470" cy="270" r="5" fill="var(--wire-neg)"></circle>
+        <text class="svg-pin" x="480" y="274">GND</text>
+        <circle cx="470" cy="300" r="5" fill="var(--wire-sig)"></circle>
+        <text class="svg-pin" x="480" y="304">D2</text>
+
+        <line x1="190" y1="270" x2="470" y2="270" stroke="var(--wire-neg)" stroke-width="2.5"></line>
+        <path d="M 115 300 L 115 438 L 444 438 L 444 300 L 470 300" stroke="var(--wire-sig)" stroke-width="2" fill="none" stroke-dasharray="5 3"></path>
+        <text class="svg-note" x="470" y="434">CHRG — 선택</text>
+
+        <circle cx="630" cy="120" r="5" fill="var(--wire-pos)"></circle>
+        <text class="svg-pin" x="620" y="124" text-anchor="end">5V</text>
+        <circle cx="630" cy="164" r="5" fill="var(--wire-neg)"></circle>
+        <text class="svg-pin" x="620" y="168" text-anchor="end">GND</text>
+        <circle cx="630" cy="208" r="5" fill="var(--wire-i2c)"></circle>
+        <text class="svg-pin" x="620" y="212" text-anchor="end">A5</text>
+        <circle cx="630" cy="252" r="5" fill="var(--wire-i2c)"></circle>
+        <text class="svg-pin" x="620" y="256" text-anchor="end">A4</text>
+
+        <rect class="box" x="700" y="96" width="96" height="180" rx="8"></rect>
+        <text class="svg-title" x="748" y="88" text-anchor="middle">OLED</text>
+        <text class="svg-pin" x="748" y="124" text-anchor="middle">VDD</text>
+        <text class="svg-pin" x="748" y="168" text-anchor="middle">GND</text>
+        <text class="svg-pin" x="748" y="212" text-anchor="middle">SCK</text>
+        <text class="svg-pin" x="748" y="256" text-anchor="middle">SDA</text>
+
+        <line x1="630" y1="120" x2="700" y2="120" stroke="var(--wire-pos)" stroke-width="2.5"></line>
+        <line x1="630" y1="164" x2="700" y2="164" stroke="var(--wire-neg)" stroke-width="2.5"></line>
+        <line x1="630" y1="208" x2="700" y2="208" stroke="var(--wire-i2c)" stroke-width="2.5"></line>
+        <line x1="630" y1="252" x2="700" y2="252" stroke="var(--wire-i2c)" stroke-width="2.5"></line>
+
+        <text class="svg-note" x="40" y="462">
+          빨강 = 전원 +　　먹색 = 접지 −　　주황 = 신호　　청록 = I2C
+        </text>
+      </svg>
+      <figcaption>
+        패드 배치는 실물 모듈과 같은 순서다. <span class="m">R1</span>과
+        <span class="m">R2</span>는 직렬로 이어지고, 그 사이 <strong>중간 탭</strong>에서
+        <span class="m">A0</span>로 선이 갈라진다. <span class="m">R2</span> 아래는
+        <span class="m">GND</span>까지 내려가야 한다 — 이 선이 없으면 전류가 흐를 경로가 없어
+        분압이 되지 않는다.
+      </figcaption>
+    </figure>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>출발</th><th>도착</th><th>선 색</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>배터리 +</code> (빨강)</td><td><code>TP4056 B+</code></td><td><span class="swatch" style="background:var(--wire-pos)"></span>빨강</td><td>JST 커넥터</td></tr>
+          <tr><td><code>배터리 −</code> (검정)</td><td><code>TP4056 B−</code></td><td><span class="swatch" style="background:var(--wire-neg)"></span>검정</td><td>JST 커넥터</td></tr>
+          <tr><td><code>TP4056 OUT+</code></td><td><code>R1</code> 한쪽 다리</td><td><span class="swatch" style="background:var(--wire-sig)"></span>주황</td><td>분압 입력</td></tr>
+          <tr><td><code>R1</code>·<code>R2</code> 사이</td><td><code>UNO A0</code></td><td><span class="swatch" style="background:var(--wire-sig)"></span>주황</td><td><strong>중간 탭</strong> — 여기를 읽는다</td></tr>
+          <tr><td><code>R2</code> 반대쪽 다리</td><td><code>UNO GND</code></td><td><span class="swatch" style="background:var(--wire-neg)"></span>검정</td><td><strong>빠뜨리기 쉽다</strong> — 없으면 분압이 성립하지 않는다</td></tr>
+          <tr><td><code>TP4056 OUT−</code></td><td><code>UNO GND</code></td><td><span class="swatch" style="background:var(--wire-neg)"></span>검정</td><td><strong>공통 접지 필수</strong></td></tr>
+          <tr><td><code>TP4056 CHRG</code></td><td><code>UNO D2</code></td><td><span class="swatch" style="background:var(--wire-sig)"></span>주황</td><td>선택 — 충전 감지</td></tr>
+          <tr><td><code>UNO 5V</code></td><td><code>OLED VDD</code></td><td><span class="swatch" style="background:var(--wire-pos)"></span>빨강</td><td></td></tr>
+          <tr><td><code>UNO GND</code></td><td><code>OLED GND</code></td><td><span class="swatch" style="background:var(--wire-neg)"></span>검정</td><td></td></tr>
+          <tr><td><code>UNO A5</code></td><td><code>OLED SCK</code></td><td><span class="swatch" style="background:var(--wire-i2c)"></span>청록</td><td>SCL과 같은 핀</td></tr>
+          <tr><td><code>UNO A4</code></td><td><code>OLED SDA</code></td><td><span class="swatch" style="background:var(--wire-i2c)"></span>청록</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <section>
+    <h2><span class="num">04</span> 핀 헤더를 납땜한다</h2>
+    <p>
+      패드 4개가 <span class="m">2.54mm</span> 간격 스루홀이라 브레드보드 피치와 같다.
+      <strong>스트레이트 핀 헤더를 아래로 납땜하면 모듈을 브레드보드에 꽂아 쓸 수 있다.</strong>
+      점퍼선을 잘라 직접 납땜하는 것보다 이쪽이 낫다.
+    </p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>방식</th><th>장점</th><th>단점</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>핀 헤더</strong> 납땜</td>
+            <td>브레드보드에 탈착 가능, 배선 변경이 자유롭다. 모듈이 흔들리지 않는다</td>
+            <td>핀 헤더가 필요하다</td>
+          </tr>
+          <tr>
+            <td>점퍼선 잘라 납땜</td>
+            <td>지금 있는 재료로 된다</td>
+            <td>선이 고정돼 회로를 바꿀 때마다 다시 납땜. 모듈이 공중에 뜬다</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      한 번 납땜하면 이 모듈을 다음 프로젝트에도 그대로 쓴다. 선을 직접 붙이면 그때마다
+      다시 뜯어야 한다.
+    </p>
+
+    <ol>
+      <li><strong>배터리를 뺀 상태에서</strong> 납땜한다. <span class="m">B+</span>/<span class="m">B−</span>에 전압이 걸린 채로 인두를 대면 단락 위험이 있다.</li>
+      <li>4핀 헤더를 패드에 꽂고 <strong>부품면이 위로</strong> 오게 둔다. 핀은 기판 아래로 나온다.</li>
+      <li>브레드보드에 핀을 미리 꽂아두고 납땜하면 수직이 저절로 맞는다.</li>
+      <li>모서리 한 핀을 먼저 붙여 고정한 뒤 각도를 확인하고 나머지를 붙인다.</li>
+    </ol>
+
+    <div class="callout">
+      <h3>배터리는 브레드보드를 거쳐 연결한다</h3>
+      <p>
+        모듈을 브레드보드에 꽂으면 <span class="m">B+</span>/<span class="m">B−</span>도 각각
+        브레드보드 열에 연결된다. 배터리 JST는 그 열에 꽂으면 되므로
+        <strong>모듈에 직접 납땜할 필요가 없다.</strong> 배터리를 뺐다 꽂기도 쉬워진다.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span> 분압 회로</h2>
+    <p>
+      저항 두 개를 <strong>직렬로 잇고 그 사이에서 선을 뽑아</strong> A0로 보낸다.
+      같은 값이면 전압이 정확히 절반으로 나뉜다. 만충 <span class="m">4.2V</span>가
+      <span class="m">2.1V</span>로 들어오므로 ADC 범위에 여유 있게 들어간다.
+    </p>
+    <p>
+      브레드보드에서는 <strong>가운데 열에 세 개가 모이는 것</strong>이 핵심이다 —
+      R1의 한쪽 다리, R2의 한쪽 다리, 그리고 <span class="m">A0</span>로 가는 점퍼.
+      같은 열은 내부에서 연결되므로 저절로 중간 탭이 만들어진다.
+    </p>
+    <p>
+      <strong><span class="m">10k</span>를 쓰는 이유</strong>는 ATmega328P 데이터시트가
+      아날로그 소스 임피던스를 <span class="m">10kΩ</span> 이하로 권장하기 때문이다.
+      <span class="m">10k+10k</span>의 등가 출력 임피던스는 <span class="m">5kΩ</span>이라
+      범위 안이다. <span class="m">100k</span>를 쓰면 <span class="m">50kΩ</span>이 되어
+      ADC 입력 누설이 만드는 오차가 커진다.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 560 300" role="img" aria-label="OUT플러스에서 100킬로옴 저항을 지나 A0로 분기하고, 다시 100킬로옴 저항을 지나 GND로 내려가는 2대1 분압 회로">
+        <line x1="180" y1="42" x2="180" y2="82" stroke="var(--wire-sig)" stroke-width="2.5"></line>
+        <text class="svg-label" x="180" y="32" text-anchor="middle">OUT+</text>
+        <text class="svg-pin" x="196" y="66">4.2V</text>
+
+        <rect class="box" x="156" y="82" width="48" height="62" rx="4"></rect>
+        <text class="svg-pin" x="180" y="110" text-anchor="middle">R1</text>
+        <text class="svg-pin" x="180" y="126" text-anchor="middle">10k</text>
+
+        <line x1="180" y1="144" x2="180" y2="176" stroke="var(--wire-sig)" stroke-width="2.5"></line>
+        <circle cx="180" cy="176" r="4.5" fill="var(--wire-sig)"></circle>
+        <line x1="180" y1="176" x2="300" y2="176" stroke="var(--wire-sig)" stroke-width="2.5"></line>
+        <rect class="box" x="300" y="156" width="86" height="40" rx="6"></rect>
+        <text class="svg-label" x="343" y="181" text-anchor="middle">A0</text>
+        <text class="svg-pin" x="240" y="167" text-anchor="middle">2.1V</text>
+
+        <line x1="180" y1="176" x2="180" y2="206" stroke="var(--wire-sig)" stroke-width="2.5"></line>
+        <rect class="box" x="156" y="206" width="48" height="62" rx="4"></rect>
+        <text class="svg-pin" x="180" y="234" text-anchor="middle">R2</text>
+        <text class="svg-pin" x="180" y="250" text-anchor="middle">10k</text>
+
+        <line x1="180" y1="268" x2="180" y2="286" stroke="var(--wire-neg)" stroke-width="2.5"></line>
+        <line x1="156" y1="286" x2="204" y2="286" stroke="var(--wire-neg)" stroke-width="2.5"></line>
+        <line x1="163" y1="292" x2="197" y2="292" stroke="var(--wire-neg)" stroke-width="2"></line>
+        <line x1="171" y1="297" x2="189" y2="297" stroke="var(--wire-neg)" stroke-width="1.5"></line>
+
+        <text class="svg-note" x="420" y="106">누설 전류</text>
+        <text class="svg-label" x="420" y="128">210 µA</text>
+        <text class="svg-note" x="420" y="150">4.2V ÷ 20kΩ</text>
+        <text class="svg-note" x="420" y="176">2950mAh 기준</text>
+        <text class="svg-note" x="420" y="194">약 1.6년치 — 무시 가능</text>
+      </svg>
+      <figcaption>
+        직결해도 4.2V는 5V ADC 범위 안이지만, 아두이노가 꺼진 상태에서 A0에 전압이 걸리면
+        내부 보호 다이오드로 역전류가 흐른다. 분압은 그 경로를 없앤다.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span> 조립 순서</h2>
+    <ol>
+      <li><strong>배터리를 빼둔 채</strong> OLED와 저항부터 배선한다.</li>
+      <li>USB로 아두이노만 연결해 <code class="m">01_voltage_monitor</code>를 올린다. 이때 A0는 <code class="m">0V</code> 부근으로 읽혀야 정상이다.</li>
+      <li>배터리를 <span class="m">B+</span>/<span class="m">B−</span>에 연결한다. 빨강이 <span class="m">B+</span>다.</li>
+      <li>멀티미터로 <span class="m">OUT+</span>/<span class="m">OUT−</span> 전압을 재서 시리얼 값과 맞춘다.</li>
+      <li>맞춘 <code class="m">DIVIDER_RATIO</code>를 <code class="m">02_battery_gauge</code>에 옮겨 적고 올린다.</li>
+    </ol>
+
+    <div class="callout ok">
+      <h3>JST 커넥터에 점퍼를 임시로 꽂아 쓸 때</h3>
+      <p>
+        접촉이 헐거우면 순간 단선보다 <strong>옆 접점과 닿는 쪽</strong>이 위험하다.
+        리튬이온은 단락 시 수십 암페어가 흐른다. 배선을 바꾸거나 보드를 옮길 때는
+        <strong>배터리를 먼저 뽑는다.</strong> JST PH2.0 변환 케이블이 도착하면 그쪽으로 바꾼다.
+      </p>
+    </div>
+  </section>
+
+  <hr>
+
+  <footer>
+    스케치와 상세 설명은 <code>junho85/arduino</code> 저장소의
+    <code>battery-gauge-tp4056/</code> 참조.
+  </footer>
+
+</div>
+</body>
+</html>

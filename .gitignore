@@ -1,0 +1,11 @@
+# IDE
+.idea/
+*.iml
+
+# arduino-cli 빌드 산출물
+build/
+*.hex
+*.elf
+
+# macOS
+.DS_Store
